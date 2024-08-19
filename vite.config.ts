@@ -22,6 +22,5 @@ export default defineConfig({
   },
   server: {
     open: env.VITE_PRODUCTION ? "danish-squares" : false
-  },
-  publicDir: "./public"
+  }
 })
