@@ -30,7 +30,7 @@ export default function Main() {
                 </div>)
         }
         </div>
-        <h1 className="text-2xl mt-20">Public booklets</h1>
+        <h1 className="text-2xl mt-5 lg:mt-20">Public booklets</h1>
         <div className="flex flex-row flex-wrap mt-5 gap-5">
         {
             !publicBooklets ? <img src="./loading.svg" alt="loading" className="w-20" /> : publicBooklets.length === 0 ? <p>There are no public booklets yet.</p> : publicBooklets.map((publicBooklet, index) => <Link key={index} to={`/shared/${encodeURI(publicBooklet._id)}`} className="bg-amber-100 border-2 border-amber-200 rounded-md p-2 pl-4 relative w-64 min-h-20">

@@ -67,7 +67,7 @@ export default function AddBooklet() {
             <input value={name} onChange={e => setName(e.target.value)} className="border-2 border-gray-300 rounded-md w-fit" />
         </div>
         {
-            terms.map((term, index) => <div key={index} className="bg-amber-100 border-2 border-amber-200 rounded-md p-[10px] pl-4 relative z-10 flex flex-col w-96">
+            terms.map((term, index) => <div key={index} className="bg-amber-100 border-2 border-amber-200 rounded-md p-[10px] pl-4 relative z-10 flex flex-col mr-5 lg:mr-0 lg:w-96">
                 <div className="flex flex-row gap-3">
                     <p>English</p>
                     <input value={term.english} onChange={e => { const c = structuredClone(terms); c[index].english = e.target.value; setTerms(c) }} className="mb-2 bg-amber-100 rounded-md border-black border-[1px] w-full" />
