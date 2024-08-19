@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import Cookies from "../other/Cookies";
 
 
 export default function Welcome(): React.ReactElement {
-    const [showCookies, setShowCookies] = useState(true)
-
     return <div className="w-full min-h-screen mb-40">
         <div className="mx-auto max-w-screen-3xl px-32 h-full flex flex-col gap-5 items-center text-center">
             <h1 className="text-black text-6xl mt-[12%]">Learning is hard</h1>
@@ -70,7 +67,5 @@ export default function Welcome(): React.ReactElement {
                 <Link to="/sign-up" className="p-3 bg-slate-100 shadow-sm rounded-md">Sign Up</Link>
             </div>
         </div>
-
-        { showCookies ? <Cookies setShowCookies={setShowCookies} /> : ""}
     </div>
 }

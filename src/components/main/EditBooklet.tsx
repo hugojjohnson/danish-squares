@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import useUser from "../../hooks/useUser"
 import { useEffect, useState } from "react"
 import { Word } from "../../Interfaces"
@@ -7,7 +7,6 @@ import { Word } from "../../Interfaces"
 export default function EditBooklet() {
     const params = useParams()
     const [user] = useUser()
-    const navigate = useNavigate()
 
     const [bookIndex, setBookIndex] = useState<number | undefined>(undefined)
     const [editingIndex, setEditingIndex] = useState(-1)
