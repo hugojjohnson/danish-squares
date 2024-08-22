@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useUser from "../../hooks/useUser";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { baseURL } from "../../Network";
+import { useNavigate, useParams } from "react-router-dom";
+import { baseURL, get } from "../../Network";
+import { Book } from "../../Interfaces";
 
 export default function Booklet(): React.ReactElement {
 
@@ -9,42 +10,108 @@ export default function Booklet(): React.ReactElement {
     const params = useParams()
     const [user] = useUser()
 
-    const [bookIndex, setBookIndex] = useState<number | undefined>(undefined)
+    const [book, setBook] = useState<Book | undefined>(undefined)
     const [index, setIndex] = useState(0)
     const [hidden, setHidden] = useState(false)
     const [lastClicked, setLastClicked] = useState(-1)
+    const [, setSpokenWord] = useState<{ english: string, danish: string, audio: string, audioSlow: string } | undefined | null>(null)
+    const intervalRef = useRef<NodeJS.Timeout | null>(null); // Use useRef to store the interval ID
 
     useEffect(() => {
         if (!params || !params.book) {
-            console.log("oh no")
             navigate("/")
         }
 
         const myIndex = user.books.findIndex(book => book.name === params.book)
-        if (myIndex === -1) {
-            console.log("oh no")
-            navigate("/")
+        if (myIndex !== -1) {
+            setBook(user.books[myIndex])
+            return
         }
-        setBookIndex(myIndex)
+
+        doStuff()
+        async function doStuff() {
+            const response = await get<Book>("main/shared-book", { id: params.book })
+            if (response.success) {
+                setBook(response.data)
+            } else {
+                navigate("/")
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location])
 
     const itemsPerPage = 12
 
+    // ========================
+
+    const speakMessage = (text: string) => {
+        const message = new SpeechSynthesisUtterance();
+        message.text = text;
+        message.rate = 0.5;
+        const speechSynthesis = window.speechSynthesis;
+        speechSynthesis.speak(message);
+    }
+
+    const practiceFunc = (init = false) => {
+        if (book === undefined) {
+            return
+        }
+
+        const idk = book.words[Math.floor((Math.random() * book.words.length))]
+        if (init) {
+            setSpokenWord(undefined)
+            return
+        }
+        setSpokenWord(prevState => {
+            if (prevState === null) {
+                return null
+            } else if (prevState === undefined) {
+                speakMessage(idk.english)
+                return idk
+            } else {
+                const audio = new Audio(baseURL + "public/audio/" + prevState.audio);
+                audio.play(); // Play the audio file
+                return undefined
+            }
+        });
+    };
+
+    const startPractice = () => {
+        // Call the function immediately
+        practiceFunc(true);
+        // Set up an interval to call practiceFunc every 10 seconds
+        intervalRef.current = setInterval(practiceFunc, 5000);
+    };
+
+    const stopPractice = () => {
+        // Clear the interval if it exists
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    };
+    useEffect(() => {
+        return () => {
+            stopPractice();
+        };
+    }, []);
+    // ========================
+
     /** ========== JSX ========== **/
-    if (bookIndex === undefined) { return <div>Loading...</div>}
+    if (book === undefined) { return <div>Loading...</div>}
     return <div className="max-w-screen-xl mx-auto pt-10 flex flex-col">
         <div className="flex flex-row gap-10">
             <div className="bg-amber-100 border-2 border-amber-200 rounded-md grid grid-cols-4 grid-rows-3 place-items-center w-full">
                 {
-                    // user.books[bookIndex].words.slice(index * itemsPerPage, Math.min(user.books[bookIndex].words.length, index * itemsPerPage + itemsPerPage)).map((idk, wordIndex) => <div key={wordIndex} onClick={() => { new Audio("/audio/" + (wordIndex === lastClicked ? idk.audioSlow : idk.audio)).play(); (wordIndex === lastClicked ? setLastClicked(-1) : setLastClicked(wordIndex)) }} className="hover:cursor-pointer w-full h-full flex items-center justify-center hover:bg-yellow-100">
-                    user.books[bookIndex].words.slice(index * itemsPerPage, Math.min(user.books[bookIndex].words.length, index * itemsPerPage + itemsPerPage)).map((idk, wordIndex) => <div key={wordIndex} onClick={() => { new Audio(baseURL + "public/audio/" + (wordIndex === lastClicked ? idk.audioSlow : idk.audio)).play(); (wordIndex === lastClicked ? setLastClicked(-1) : setLastClicked(wordIndex)) }} className="hover:cursor-pointer w-full h-full flex items-center justify-center hover:bg-yellow-100">
+                    // book.words.slice(index * itemsPerPage, Math.min(book.words.length, index * itemsPerPage + itemsPerPage)).map((idk, wordIndex) => <div key={wordIndex} onClick={() => { new Audio("/audio/" + (wordIndex === lastClicked ? idk.audioSlow : idk.audio)).play(); (wordIndex === lastClicked ? setLastClicked(-1) : setLastClicked(wordIndex)) }} className="hover:cursor-pointer w-full h-full flex items-center justify-center hover:bg-yellow-100">
+                    book.words.slice(index * itemsPerPage, Math.min(book.words.length, index * itemsPerPage + itemsPerPage)).map((idk, wordIndex) => <div key={wordIndex} onClick={() => { new Audio(baseURL + "public/audio/" + (wordIndex === lastClicked ? idk.audioSlow : idk.audio)).play(); (wordIndex === lastClicked ? setLastClicked(-1) : setLastClicked(wordIndex)) }} className="hover:cursor-pointer w-full h-full flex items-center justify-center hover:bg-yellow-100">
                         <p className="my-20 ">{idk.english}</p>
                     </div>)
                 }
             </div>
             <div className="bg-amber-100 border-2 border-amber-200 rounded-md grid grid-cols-4 grid-rows-3 place-items-center w-full">
                 {
-                    user.books[bookIndex].words.slice(index * itemsPerPage, Math.min(user.books[bookIndex].words.length, index * itemsPerPage + itemsPerPage)).map((idk, wordIndex) => <div key={wordIndex} onClick={() => { new Audio("/audio/" + (wordIndex === lastClicked ? idk.audioSlow : idk.audio)).play(); (wordIndex === lastClicked ? setLastClicked(-1) : setLastClicked(wordIndex)) }} className="hover:cursor-pointer w-full h-full flex items-center justify-center hover:bg-yellow-100">
+                    book.words.slice(index * itemsPerPage, Math.min(book.words.length, index * itemsPerPage + itemsPerPage)).map((idk, wordIndex) => <div key={wordIndex} onClick={() => { new Audio(baseURL + "public/audio/" + (wordIndex === lastClicked ? idk.audioSlow : idk.audio)).play(); (wordIndex === lastClicked ? setLastClicked(-1) : setLastClicked(wordIndex)) }} className="hover:cursor-pointer w-full h-full flex items-center justify-center hover:bg-yellow-100">
                         <p className="my-20 ">{hidden ? "" : idk.danish}</p>
                     </div>)
                 }
@@ -57,8 +124,14 @@ export default function Booklet(): React.ReactElement {
             <p className="text-xl px-5 py-2">{index + 1}</p>
             <button onClick={() => setHidden(!hidden)} className="border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2">{hidden ? "Show" : "Hide"}</button>
             <button onClick={() => index > 0 && setIndex(index - 1)} className="ml-auto mr-16">Back</button>
-            <button onClick={() => index * itemsPerPage < user.books[bookIndex].words.length && setIndex(index + 1)} >Next</button>
+            <button onClick={() => index * itemsPerPage < book.words.length && setIndex(index + 1)} >Next</button>
         </div>
-        <Link className="mt-32 border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2 w-fit" to={"/add"}>Add words</Link>
+
+        {/* <Link className="mt-32 border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2 w-fit" to={"/add"}>Add words</Link> */}
+
+        <div className="flex flex-row mt-8 pr-8 lg:pr-0 gap-5">
+            <button onClick={startPractice} className="border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2">Start</button>
+            <button onClick={stopPractice} className="border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2">Stop</button>
+        </div>
     </div>
 }

@@ -17,7 +17,6 @@ import Signin from "./components/user/Signin";
 import Signup from "./components/user/Signup";
 import { NoPage } from "./components/other/NoPage";
 import { get } from "./Network";
-import SharedBooklet from "./components/main/SharedBooklet";
 
 function App(): React.ReactElement {
   // Context
@@ -65,10 +64,10 @@ function App(): React.ReactElement {
     }
     if (user?.token) {
       localStorage.setItem("danishSquaresUser", JSON.stringify(user))
-      console.log("User changed.")
+      console.debug("User changed.")
     } else {
       localStorage.removeItem("danishSquaresUser")
-      console.log("Signed out.")
+      console.debug("Signed out.")
     }
   }, [user])
 
@@ -98,7 +97,7 @@ function App(): React.ReactElement {
             <Route index element={<Dashboard />} />
             <Route path="book/edit/:book" element={<EditBooklet />} />
             <Route path="book/:book" element={<Booklet />} />
-            <Route path="shared/:book" element={<SharedBooklet />} />
+            <Route path="shared/:book" element={<Booklet />} />
             <Route path="add" element={<AddWords />} />
             <Route path="add-booklet" element={<AddBooklet />} />
           </Route>

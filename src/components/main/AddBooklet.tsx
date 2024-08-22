@@ -28,11 +28,9 @@ export default function AddBooklet() {
                 return
             }
         }
-        console.log(terms)
         setSyncing(true)
         const res = await post<Book>("main/add-booklet", { token: user.token }, { booklet: { name: name, words: terms  }})
         setSyncing(false)
-        console.log(res)
         if (res.success) {
             const user2 = structuredClone(user)
             user2.books.push({

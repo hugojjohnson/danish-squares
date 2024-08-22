@@ -15,14 +15,10 @@ export default function EditBooklet() {
 
     useEffect(() => {
         if (!params || !params.book) {
-            console.log("no book provided")
             // navigate("/")
         }
-        console.log(user.books)
-        console.log(params.book)
         const myIndex = user.books.findIndex(book => book.name === params.book)
         if (myIndex === -1) {
-            console.log("index is -1")
             // navigate("/")
         }
         setBookIndex(myIndex)

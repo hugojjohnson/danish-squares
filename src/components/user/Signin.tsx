@@ -31,7 +31,6 @@ export default function Signin() {
             const salt = await saltify(username + password)
             const response = await get<responseType>("users/sign-in/username", { username: username, hash: salt })
             if (response.success && typeof response.data !== "string") {
-                console.log(response)
                 setUser({ username: response.data.user.username, token: response.data.token.value, books: [] });
                 navigate('/');
                 return;
