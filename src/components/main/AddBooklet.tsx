@@ -54,7 +54,7 @@ export default function AddBooklet() {
         <h1 className="text-xl">Loading...</h1>
         <p>The audio is being generated. This could take up to a minute.</p>
         <p>If nothing's happening, click <span className="text-blue-700 hover:cursor-pointer" onClick={() => navigate("/")}>here</span>.</p>
-        <img src="/public/loading.svg" alt="loading" className=" w-44 mb-20" />
+        <img src="./loading.svg" alt="loading" className=" w-44 mb-20" />
     </div>
 
     return <div className="flex flex-col gap-5">
