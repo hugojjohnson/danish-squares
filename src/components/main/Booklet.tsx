@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import useUser from "../../hooks/useUser";
 import { useNavigate, useParams } from "react-router-dom";
-import { baseURL, get, post } from "../../Network";
+import { baseURL, get } from "../../Network";
 import { Book } from "../../Interfaces";
-import Crunker from "crunker";
 import axios from "axios";
 
 export default function Booklet(): React.ReactElement {
@@ -16,7 +15,7 @@ export default function Booklet(): React.ReactElement {
     const [index, setIndex] = useState(0)
     const [hidden, setHidden] = useState(false)
     const [lastClicked, setLastClicked] = useState(-1)
-    const [, setSpokenWord] = useState<{ english: string, danish: string, audio: string, audioSlow: string } | undefined | null>(null)
+    // const [, setSpokenWord] = useState<{ english: string, danish: string, audio: string, audioSlow: string } | undefined | null>(null)
     const intervalRef = useRef<NodeJS.Timeout | null>(null); // Use useRef to store the interval ID
 
     const itemsPerPage = 12
@@ -51,44 +50,44 @@ export default function Booklet(): React.ReactElement {
 
     // ========================
 
-    const speakMessage = (text: string) => {
-        const message = new SpeechSynthesisUtterance();
-        message.text = text;
-        message.rate = 0.5;
-        const speechSynthesis = window.speechSynthesis;
-        speechSynthesis.speak(message);
-    }
+    // const speakMessage = (text: string) => {
+    //     const message = new SpeechSynthesisUtterance();
+    //     message.text = text;
+    //     message.rate = 0.5;
+    //     const speechSynthesis = window.speechSynthesis;
+    //     speechSynthesis.speak(message);
+    // }
 
-    const practiceFunc = (init = false) => {
-        if (book === undefined) {
-            return
-        }
+    // const practiceFunc = (init = false) => {
+    //     if (book === undefined) {
+    //         return
+    //     }
 
-        const idk = book.words[Math.floor((Math.random() * book.words.length))]
-        if (init) {
-            setSpokenWord(undefined)
-            return
-        }
-        setSpokenWord(prevState => {
-            if (prevState === null) {
-                return null
-            } else if (prevState === undefined) {
-                speakMessage(idk.english)
-                return idk
-            } else {
-                const audio = new Audio(baseURL + "public/audio/" + prevState.audio);
-                audio.play(); // Play the audio file
-                return undefined
-            }
-        });
-    };
+    //     const idk = book.words[Math.floor((Math.random() * book.words.length))]
+    //     if (init) {
+    //         setSpokenWord(undefined)
+    //         return
+    //     }
+    //     setSpokenWord(prevState => {
+    //         if (prevState === null) {
+    //             return null
+    //         } else if (prevState === undefined) {
+    //             speakMessage(idk.english)
+    //             return idk
+    //         } else {
+    //             const audio = new Audio(baseURL + "public/audio/" + prevState.audio);
+    //             audio.play(); // Play the audio file
+    //             return undefined
+    //         }
+    //     });
+    // };
 
-    const startPractice = () => {
-        // Call the function immediately
-        practiceFunc(true);
-        // Set up an interval to call practiceFunc every 10 seconds
-        intervalRef.current = setInterval(practiceFunc, 5000);
-    };
+    // const startPractice = () => {
+    //     // Call the function immediately
+    //     practiceFunc(true);
+    //     // Set up an interval to call practiceFunc every 10 seconds
+    //     intervalRef.current = setInterval(practiceFunc, 5000);
+    // };
 
     const stopPractice = () => {
         // Clear the interval if it exists
@@ -99,42 +98,8 @@ export default function Booklet(): React.ReactElement {
     }
 
     const getAudio = () => {
-        // let crunker = new Crunker()
-        // crunker.fetchAudio((baseURL + "public/audio/" + book?.words[0].audio), (baseURL + "public/audio/" + book?.words[1].audio))
-        //     .then((buffers) => {
-        //         // => [AudioBuffer, AudioBuffer]
-        //         return crunker.concatAudio(buffers)
-        //     })
-        //     .then((merged) => {
-        //         // => AudioBuffer
-        //         return crunker.export(merged, 'audio/mp3');
-        //     })
-        //     .then((output) => {
-        //         // => {blob, element, url}
-        //         crunker.download(output.blob);
-        //         document.body.append(output.element);
-        //         console.log(output.url);
-        //     })
-        //     .catch((error) => {
-        //         console.error(error)
-        //         // => Error Message
-        //     });
-
-        // crunker.notSupported(() => {
-        //     console.error("Browser does not support Crunker.")
-        //     // Handle no browser support
-        // });
         async function doStuff() {
             if (book === undefined) { return }
-            // const response = await post<Blob>("main/generate-audio", { token: user.token }, { words: book.words.slice(index * itemsPerPage, Math.min(book.words.length, index * itemsPerPage + itemsPerPage)) })
-            // console.log(response)
-            // if (!response.success) { return }
-
-            // const blob = response.data.blob()
-            // const url = window.URL.createObjectURL(blob)
-            // window.open(url)
-            // setTimeout(() => window.URL.revokeObjectURL(url), 1000) // Revoke object URL to release memory after some time (optional but good practice)
-
             const response = await axios.post<Blob>(baseURL + "main/generate-audio", {
                 words: book.words.slice(index * itemsPerPage, Math.min(book.words.length, index * itemsPerPage + itemsPerPage))
             }, {

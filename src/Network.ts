@@ -2,10 +2,6 @@ import axios, { AxiosError } from "axios";
 import { RequestResponse } from "./Interfaces";
 
 
-// export const baseURL =;
-if (import.meta.env.VITE_PRODUCTION) {
-    console.log("Wooo")
-}
 export const baseURL = import.meta.env.DEV ? "http://localhost:3001/danish-squares/" : "https://44.220.164.141.nip.io/danish-squares/"
 
 const apiClient = axios.create({
