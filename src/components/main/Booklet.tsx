@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import useUser from "../../hooks/useUser";
 import { useNavigate, useParams } from "react-router-dom";
-import { baseURL, get } from "../../Network";
+import { baseURL, get, post } from "../../Network";
 import { Book } from "../../Interfaces";
+import Crunker from "crunker";
+import axios from "axios";
 
 export default function Booklet(): React.ReactElement {
 
@@ -16,6 +18,8 @@ export default function Booklet(): React.ReactElement {
     const [lastClicked, setLastClicked] = useState(-1)
     const [, setSpokenWord] = useState<{ english: string, danish: string, audio: string, audioSlow: string } | undefined | null>(null)
     const intervalRef = useRef<NodeJS.Timeout | null>(null); // Use useRef to store the interval ID
+
+    const itemsPerPage = 12
 
     useEffect(() => {
         if (!params || !params.book) {
@@ -37,10 +41,13 @@ export default function Booklet(): React.ReactElement {
                 navigate("/")
             }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location])
 
-    const itemsPerPage = 12
+    useEffect(() => {
+        return () => {
+            stopPractice();
+        };
+    }, []);
 
     // ========================
 
@@ -89,13 +96,61 @@ export default function Booklet(): React.ReactElement {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
         }
-    };
-    useEffect(() => {
-        return () => {
-            stopPractice();
-        };
-    }, []);
-    // ========================
+    }
+
+    const getAudio = () => {
+        // let crunker = new Crunker()
+        // crunker.fetchAudio((baseURL + "public/audio/" + book?.words[0].audio), (baseURL + "public/audio/" + book?.words[1].audio))
+        //     .then((buffers) => {
+        //         // => [AudioBuffer, AudioBuffer]
+        //         return crunker.concatAudio(buffers)
+        //     })
+        //     .then((merged) => {
+        //         // => AudioBuffer
+        //         return crunker.export(merged, 'audio/mp3');
+        //     })
+        //     .then((output) => {
+        //         // => {blob, element, url}
+        //         crunker.download(output.blob);
+        //         document.body.append(output.element);
+        //         console.log(output.url);
+        //     })
+        //     .catch((error) => {
+        //         console.error(error)
+        //         // => Error Message
+        //     });
+
+        // crunker.notSupported(() => {
+        //     console.error("Browser does not support Crunker.")
+        //     // Handle no browser support
+        // });
+        async function doStuff() {
+            if (book === undefined) { return }
+            // const response = await post<Blob>("main/generate-audio", { token: user.token }, { words: book.words.slice(index * itemsPerPage, Math.min(book.words.length, index * itemsPerPage + itemsPerPage)) })
+            // console.log(response)
+            // if (!response.success) { return }
+
+            // const blob = response.data.blob()
+            // const url = window.URL.createObjectURL(blob)
+            // window.open(url)
+            // setTimeout(() => window.URL.revokeObjectURL(url), 1000) // Revoke object URL to release memory after some time (optional but good practice)
+
+            const response = await axios.post<Blob>(baseURL + "main/generate-audio", {
+                words: book.words.slice(index * itemsPerPage, Math.min(book.words.length, index * itemsPerPage + itemsPerPage))
+            }, {
+                responseType: 'blob', // Explicitly set the response type to Blob
+                params: { token: user.token }
+            });
+
+            const blob = new Blob([response.data], { type: 'audio/mp3' });
+            const url: string = window.URL.createObjectURL(blob);
+
+            window.open(url);
+
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        }
+        doStuff()
+    }
 
     /** ========== JSX ========== **/
     if (book === undefined) { return <div>Loading...</div>}
@@ -129,9 +184,11 @@ export default function Booklet(): React.ReactElement {
 
         {/* <Link className="mt-32 border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2 w-fit" to={"/add"}>Add words</Link> */}
 
-        <div className="flex flex-row mt-8 pr-8 lg:pr-0 gap-5">
+
+        <button onClick={getAudio} className="border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2">Get Audio</button>
+        {/* <div className="flex flex-row mt-8 pr-8 lg:pr-0 gap-5">
             <button onClick={startPractice} className="border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2">Start</button>
             <button onClick={stopPractice} className="border-2 border-gray-300 rounded-md bg-gray-100 px-5 py-2">Stop</button>
-        </div>
+        </div> */}
     </div>
 }
