@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { RequestResponse } from "./Interfaces";
 
 
-export const baseURL = import.meta.env.DEV ? "http://localhost:3002/danish-squares/" : "https://3.87.169.7.nip.io/danish-squares/"
+export const baseURL = import.meta.env.DEV ? "http://localhost:3002/danish-squares/" : "https://34.231.62.154.nip.io/danish-squares/"
 
 const apiClient = axios.create({
     baseURL: baseURL,
