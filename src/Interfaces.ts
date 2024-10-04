@@ -2,21 +2,21 @@ import { Dispatch, SetStateAction } from "react";
 
 
 export type Word = {
-    danish: string;
-    english: string;
-    audio: string;
-    audioSlow: string;
+    dW: string;
+    dS: string;
+    eW: string;
+    eS: string;
+    id: string;
+    learned: boolean;
+    starred: boolean;
 }
 
-export type Book = {
-    name: string;
-    words: Word[];
-}
 export type SafeData = {
     username: string;
     token: string;
-    books: Book[]
+    words: Word[]
 };
+
 export type UserData = SafeData | undefined | null;
 
 export type Safe = [SafeData, Dispatch<SetStateAction<SafeData>>]

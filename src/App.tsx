@@ -3,14 +3,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserContext } from "./Context";
 
 // Interfaces
-import { RequestResponse, UserData } from "./Interfaces";
+import { RequestResponse, UserData, Word } from "./Interfaces";
 
 // Components
 import Dashboard from "./components/main/Main";
 import AddWords from "./components/main/AddWords";
-import Booklet from "./components/main/Booklet";
-import AddBooklet from "./components/main/AddBooklet";
-import EditBooklet from "./components/main/EditBooklet";
 import Header from "./components/other/Header";
 // import { get } from "./Network";
 import Signin from "./components/user/Signin";
@@ -36,23 +33,12 @@ function App(): React.ReactElement {
     updateUser(tempUser)
 
     // Update user
-    interface responseType {
-      owner: string;
-      name: string;
-      public: boolean;
-      words: {
-        english: string;
-        danish: string;
-        audio: string;
-        audioSlow: string;
-      }[]
-    }
     async function updateUser(tempUser: UserData): Promise<void> {
-      const response: RequestResponse<responseType[]> = await get("auth/get-updates", { token: tempUser?.token })
+      const response: RequestResponse<Word[]> = await get("auth/get-updates", { token: tempUser?.token })
       if (response.success && tempUser?.username) {
         setUser({
           ...tempUser,
-          books: response.data.map(book => { return { name: book.name, words: book.words }})
+          words: response.data
         })
       }
     }
@@ -95,11 +81,7 @@ function App(): React.ReactElement {
         <Routes>
           <Route path="/" element={<Header />}>
             <Route index element={<Dashboard />} />
-            <Route path="book/edit/:book" element={<EditBooklet />} />
-            <Route path="book/:book" element={<Booklet />} />
-            <Route path="shared/:book" element={<Booklet />} />
-            <Route path="add" element={<AddWords />} />
-            <Route path="add-booklet" element={<AddBooklet />} />
+            <Route path="add-words" element={<AddWords />} />
           </Route>
         </Routes>
       </BrowserRouter>
