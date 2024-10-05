@@ -41,7 +41,7 @@ export default function Main() {
                     <td>{word.eW}</td>
                     <td>{word.eS}</td>
                     <td><div className={`w-3 h-3 rounded-full ${word.learned ? "bg-green-500" : "bg-orange-300"} mx-auto`}></div></td>
-                    <td><img src="/star.png" className="w-10 mx-auto" /></td>
+                    <td><img src="./star.png" className="w-10 mx-auto" /></td>
                 </tr>)
             }
             </tbody>
