@@ -5,42 +5,50 @@ import { Word } from "../../Interfaces"
 
 export default function AddWords() {
     const [user, setUser] = useUser()
+    const [words, setWords] = useState("")
+    const [errorText, setErrorText] = useState("")
+    const [isAnimating, setIsAnimating] = useState(false)
 
-    const [dW, setDW] = useState("")
-    const [dS, setDS] = useState("")
-    const [eW, setEW] = useState("")
-    const [eS, setES] = useState("")
+    const splitIntoFour = (arr: string[]) => arr.reduce((acc: string[][], cur: string, idx: number) => {
+        acc[idx % 4].push(cur);
+        return acc;
+    }, [[], [], [], []]);
+
 
 
     async function addWords() {
-        const response = await post<Word[]>("/main/add-words", { token: user.token }, { dW: dW, dS: dS, eW: eW, eS: eS })
+        setErrorText("Sending request...")
+        if (words.split("\n").length % 4 !== 0) {
+            setErrorText("Error: Length is not correct")
+            return
+        }
+        const myList = splitIntoFour(words.split("\n"))
+        const response = await post<Word[]>("/main/add-words", { token: user.token }, { dW: myList[2].join("\n"), dS: myList[3].join("\n"), eW: myList[0].join("\n"), eS: myList[1].join("\n") })
         console.log(response.data)
         if (response.success) {
             setUser({ ...user, words: user.words.concat(response.data) })
+            setWords("")
+            setIsAnimating(true)
+            setErrorText("")
+            setTimeout(() => setIsAnimating(false), 1500)
+        } else {
+            setErrorText("Error: " + response.data)
         }
     }
 
-    return <div>
+    return <div className="flex flex-col">
         <h1 className="text-2xl pb-10">Add words</h1>
         <div className="flex flex-row gap-3">
-            <div>
-                <p>Danish</p>
-                <textarea value={dW} onChange={e => setDW(e.target.value)} className="border-[1px] border-gray-300 rounded-md min-h-96" />
-            </div>
-            <div>
-                <p>Danish sentence</p>
-                <textarea value={dS} onChange={e => setDS(e.target.value)} className="border-[1px] border-gray-300 rounded-md min-h-96" />
-            </div>
-            <div>
-                <p>English</p>
-                <textarea value={eW} onChange={e => setEW(e.target.value)} className="border-[1px] border-gray-300 rounded-md min-h-96" />
-            </div>
-            <div>
-                <p>English sentence</p>
-                <textarea value={eS} onChange={e => setES(e.target.value)} className="border-[1px] border-gray-300 rounded-md min-h-96" />
+            <div className="w-full">
+                <p>Enter it in this format:english\sentence\danish\danish_sentence</p>
+                <textarea value={words} onChange={e => setWords(e.target.value)} className="border-[1px] border-gray-300 rounded-md min-h-96 w-full" />
             </div>
         </div>
 
         <button onClick={addWords} className="bg-white border-[1px] border-gray-300 rounded-md px-4 py-2 mt-10">Add</button>
+        
+        <p className="mt-2 text-xl">{errorText}</p>
+
+        <img src="/tickSymbol.png" className={`fixed bottom-12 right-12 w-20 h-20 ${isAnimating ? "animate-tickRotateFade" : "hidden"}`} />
     </div>
 }

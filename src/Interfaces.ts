@@ -9,6 +9,7 @@ export type Word = {
     id: string;
     learned: boolean;
     starred: boolean;
+    _id: string;
 }
 
 export type SafeData = {
