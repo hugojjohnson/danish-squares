@@ -18,11 +18,15 @@ export default function AddWords() {
 
     async function addWords() {
         setErrorText("Sending request...")
-        if (words.split("\n").length % 4 !== 0) {
+        const myWords = words.split(/\\|\n/)
+        console.log(myWords)
+        if (myWords.length % 4 !== 0) {
+            console.log(words.split(/\\\|\n/))
             setErrorText("Error: Length is not correct")
             return
         }
-        const myList = splitIntoFour(words.split("\n"))
+        const myList = splitIntoFour(myWords)
+        console.log(myList)
         const response = await post<Word[]>("/main/add-words", { token: user.token }, { dW: myList[2].join("\n"), dS: myList[3].join("\n"), eW: myList[0].join("\n"), eS: myList[1].join("\n") })
         console.log(response.data)
         if (response.success) {
